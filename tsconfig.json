@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    // https://parceljs.org/typeScript.html#when-using-react
+    "jsx": "react"
+  }
+}
