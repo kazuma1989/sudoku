@@ -1,0 +1,10 @@
+{
+  "name": "sudoku",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "kazuma1989 <funifuni.1204@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3"
+  }
+}
