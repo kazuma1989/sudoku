@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     // https://parceljs.org/typeScript.html#when-using-react
-    "jsx": "react"
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "react-native": ["node_modules/react-native-web"]
+    }
   }
 }
