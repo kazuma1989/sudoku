@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useReducer } from 'react'
 import {
   AppRegistry,
   StyleSheet,
@@ -8,50 +8,156 @@ import {
   Platform,
   StatusBar,
   Dimensions,
+  TouchableHighlight,
 } from 'react-native'
+import produce from 'immer'
 
 function App() {
-  const [areas] = useState([
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-  ])
+  const [{ areas, selected }, dispatch] = useReducer(reducer, {
+    areas: [
+      [null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null],
+    ],
+    selected: [null, null],
+  })
 
   return (
     <View style={styles.container}>
       <View style={styles.areaContainer}>
         {areas.map((area, i) => (
           <View key={i} style={styles.area}>
-            {area.map((cell, j) => (
-              <View key={`${i}-${j}`} style={styles.cell}>
-                <Text style={styles.cellText}>{cell}</Text>
-              </View>
-            ))}
+            {area.map((cell, j) => {
+              const key = `${i}-${j}`
+
+              return (
+                <TouchableHighlight
+                  key={key}
+                  style={[
+                    styles.cell,
+                    key === selected.join('-') && {
+                      backgroundColor: 'powderblue',
+                    },
+                  ]}
+                  onPress={() =>
+                    dispatch({
+                      type: 'TapCell',
+                      payload: [i, j],
+                    })
+                  }
+                  underlayColor="rgba(0,0,0,0.5)"
+                >
+                  <Text style={styles.cellText}>{cell}</Text>
+                </TouchableHighlight>
+              )
+            })}
           </View>
         ))}
       </View>
 
-      <View>
-        <Text>foo</Text>
+      <View
+        style={{
+          marginTop: 10,
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+        }}
+      >
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+          <TouchableHighlight
+            key={num}
+            style={{
+              ...border,
+              borderWidth: 1,
+              borderRadius: 50,
+              marginRight: 3,
+
+              width: 50,
+              height: 50,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={() =>
+              dispatch({
+                type: 'InputNumber',
+                payload: num,
+              })
+            }
+            underlayColor="rgba(0,0,0,0.5)"
+          >
+            <Text style={{ fontSize: inputFontSize }}>{num}</Text>
+          </TouchableHighlight>
+        ))}
       </View>
     </View>
   )
 }
 
+type State = {
+  areas: (number | null)[][]
+  selected: [number, number] | [null, null]
+}
+
+type Action =
+  | {
+      type: 'TapCell'
+      payload: [number, number]
+    }
+  | {
+      type: 'InputNumber'
+      payload: number
+    }
+
+const reducer: (state: State, action: Action) => State = produce(
+  (draft: State, action: Action): void => {
+    switch (action.type) {
+      case 'TapCell': {
+        const [i, j] = action.payload
+        const [selectedI, selectedJ] = draft.selected
+
+        // Clear selected
+        if (i === selectedI && j === selectedJ) {
+          draft.selected = [null, null]
+          return
+        }
+
+        draft.selected = [i, j]
+        return
+      }
+
+      case 'InputNumber': {
+        const [i, j] = draft.selected
+        if (i === null || j === null) return
+
+        draft.areas[i][j] = action.payload
+        return
+      }
+
+      default: {
+        const _: never = action
+      }
+    }
+  },
+)
+
 const { width, height } = Dimensions.get('window')
-const deviceHeight =
-  Platform.OS === 'android' ? height - StatusBar.currentHeight! : height
-const standardScreenHeight = 680
-const fontSize = (26 * deviceHeight) / standardScreenHeight
+
+const [cellFontSize, inputFontSize] = [40, 50].map(size => {
+  const deviceHeight =
+    Platform.OS === 'android' ? height - StatusBar.currentHeight! : height
+
+  const standardScreenHeight = 680
+  return (size * deviceHeight) / standardScreenHeight
+})
 
 const border: ViewStyle = {
-  borderColor: 'silver',
+  borderColor: 'dimgray',
   borderStyle: 'solid',
   borderTopWidth: 1,
   borderRightWidth: 1,
@@ -96,8 +202,8 @@ const styles = StyleSheet.create({
   },
 
   cellText: {
-    fontWeight: 'bold',
-    fontSize,
+    // fontWeight: 'bold',
+    fontSize: cellFontSize,
   },
 })
 
