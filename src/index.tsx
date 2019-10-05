@@ -69,9 +69,9 @@ function App() {
           justifyContent: 'center',
         }}
       >
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+        {['1', '2', '3', '4', '5', '6', '7', '8', '9', '\u2573'].map(label => (
           <TouchableHighlight
-            key={num}
+            key={label}
             style={{
               ...border,
               borderWidth: 1,
@@ -86,12 +86,12 @@ function App() {
             onPress={() =>
               dispatch({
                 type: 'InputNumber',
-                payload: num,
+                payload: label,
               })
             }
             underlayColor="rgba(0,0,0,0.5)"
           >
-            <Text style={{ fontSize: inputFontSize }}>{num}</Text>
+            <Text style={{ fontSize: inputFontSize }}>{label}</Text>
           </TouchableHighlight>
         ))}
       </View>
@@ -111,7 +111,7 @@ type Action =
     }
   | {
       type: 'InputNumber'
-      payload: number
+      payload: string
     }
 
 const reducer: (state: State, action: Action) => State = produce(
@@ -132,10 +132,12 @@ const reducer: (state: State, action: Action) => State = produce(
       }
 
       case 'InputNumber': {
-        const [i, j] = draft.selected
-        if (i === null || j === null) return
+        // Do nothing when no cell is selected
+        if (draft.selected[0] === null) return
 
-        draft.areas[i][j] = action.payload
+        const [i, j] = draft.selected
+        draft.areas[i][j] = parseInt(action.payload) || null
+
         return
       }
 
