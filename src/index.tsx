@@ -42,8 +42,8 @@ const cell = {
   fontSize: 40,
 }
 
-const areaSize = cell.size * 3 + border.borderWidth * 2
-const areaContainerSize = areaSize * 3 + border.borderWidth * 2 + 2
+const areaSize = cell.size * 3 + border.borderWidth! * 2
+const areaContainerSize = areaSize * 3 + border.borderWidth! * 2 + 2
 
 const styles = StyleSheet.create({
   container: {
