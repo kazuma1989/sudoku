@@ -1,5 +1,14 @@
 import React, { useState } from 'react'
-import { AppRegistry, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import {
+  AppRegistry,
+  StyleSheet,
+  Text,
+  View,
+  ViewStyle,
+  Platform,
+  StatusBar,
+  Dimensions,
+} from 'react-native'
 
 function App() {
   const [areas] = useState([
@@ -27,57 +36,68 @@ function App() {
           </View>
         ))}
       </View>
+
+      <View>
+        <Text>foo</Text>
+      </View>
     </View>
   )
 }
 
+const { width, height } = Dimensions.get('window')
+const deviceHeight =
+  Platform.OS === 'android' ? height - StatusBar.currentHeight! : height
+const standardScreenHeight = 680
+const fontSize = (26 * deviceHeight) / standardScreenHeight
+
 const border: ViewStyle = {
-  borderStyle: 'solid',
   borderColor: 'silver',
-  borderWidth: 1,
+  borderStyle: 'solid',
+  borderTopWidth: 1,
+  borderRightWidth: 1,
+  borderBottomWidth: 0,
+  borderLeftWidth: 0,
 }
-
-const cell = {
-  size: 70,
-  fontSize: 40,
-}
-
-const areaSize = cell.size * 3 + border.borderWidth! * 2
-const areaContainerSize = areaSize * 3 + border.borderWidth! * 2 + 2
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    padding: 1,
   },
 
   areaContainer: {
     ...border,
-    borderWidth: 2,
+    borderTopWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 2,
+    borderLeftWidth: 2,
+
     flexDirection: 'row',
     flexWrap: 'wrap',
-    width: areaContainerSize,
-    height: areaContainerSize,
+    width: width - 2,
+    height: width - 2,
   },
 
   area: {
     ...border,
-    width: areaSize,
-    height: areaSize,
+
+    width: '33.333%',
+    height: '33.333%',
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
 
   cell: {
     ...border,
-    width: cell.size,
-    height: cell.size,
+
+    width: '33.333%',
+    height: '33.333%',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   cellText: {
     fontWeight: 'bold',
-    fontSize: cell.fontSize,
+    fontSize,
   },
 })
 
