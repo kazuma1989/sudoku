@@ -9,7 +9,16 @@ export type GetMapping = {
   ]
 }
 
-export type PostMapping = {}
+export type PostMapping = {
+  'https://sugoku.herokuapp.com/validate': [
+    {
+      board: number[][]
+    },
+    {
+      status: 'unsolved' | 'solved' | 'broken'
+    },
+  ]
+}
 
 export async function get<TPath extends keyof GetMapping>(
   path: TPath,
@@ -27,8 +36,11 @@ export async function post<TPath extends keyof PostMapping>(
   path: TPath,
   params: PostMapping[TPath][0],
 ): Promise<PostMapping[TPath][1]> {
+  const data = new FormData()
+  Object.entries(params).map(([k, v]) => data.append(k, JSON.stringify(v)))
+
   return fetch(path, {
     method: 'POST',
-    body: JSON.stringify(params),
+    body: data,
   }).then(resp => resp.json())
 }
