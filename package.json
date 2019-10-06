@@ -19,7 +19,7 @@
     "@types/react-native": "^0.60.18",
     "@types/styled-components": "3.x.x",
     "parcel-bundler": "^1.12.3",
-    "typescript": "^3.6.3"
+    "typescript": "3.6.x"
   },
   "alias": {
     "react-native": "react-native-web"
