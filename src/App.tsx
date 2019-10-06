@@ -1,6 +1,5 @@
 import React, { useReducer, useEffect } from 'react'
 import {
-  StyleSheet,
   Text,
   View,
   ViewStyle,
@@ -11,6 +10,7 @@ import {
 } from 'react-native'
 import produce from 'immer'
 import * as api from './api'
+import styled, { css } from 'styled-components/native'
 
 export default function App() {
   const [{ areas, selected }, dispatch] = useReducer(reducer, {
@@ -42,22 +42,21 @@ export default function App() {
   }, [])
 
   return (
-    <View style={styles.container}>
-      <View style={styles.areaContainer}>
+    <Container>
+      <Board>
         {areas.map((area, i) => (
-          <View key={i} style={styles.area}>
+          <Area key={i}>
             {area.map((cell, j) => {
               const key = `${i}-${j}`
 
               return (
-                <TouchableHighlight
+                <Cell
                   key={key}
-                  style={[
-                    styles.cell,
+                  style={
                     key === selected.join('-') && {
                       backgroundColor: 'powderblue',
-                    },
-                  ]}
+                    }
+                  }
                   onPress={() =>
                     dispatch({
                       type: 'TapCell',
@@ -66,13 +65,13 @@ export default function App() {
                   }
                   underlayColor="rgba(0,0,0,0.5)"
                 >
-                  <Text style={styles.cellText}>{cell}</Text>
-                </TouchableHighlight>
+                  <CellText>{cell}</CellText>
+                </Cell>
               )
             })}
-          </View>
+          </Area>
         ))}
-      </View>
+      </Board>
 
       <View
         style={{
@@ -108,7 +107,7 @@ export default function App() {
           </TouchableHighlight>
         ))}
       </View>
-    </View>
+    </Container>
   )
 }
 
@@ -283,44 +282,50 @@ const border: ViewStyle = {
   borderLeftWidth: 0,
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 1,
-  },
+const Container = styled.View`
+  padding: 1px;
+`
 
-  areaContainer: {
-    ...border,
-    borderTopWidth: 0,
-    borderRightWidth: 0,
-    borderBottomWidth: 2,
-    borderLeftWidth: 2,
+const borderStyle = css`
+  border-color: dimgray;
+  border-style: solid;
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 0;
+  border-left-width: 0;
+`
 
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    width: width - 2,
-    height: width - 2,
-  },
+const Board = styled.View`
+  ${borderStyle}
+  border-top-width: 0;
+  border-right-width: 0;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
 
-  area: {
-    ...border,
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: ${width - 2}px;
+  height: ${width - 2}px;
+`
 
-    width: '33.333%',
-    height: '33.333%',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
+const Area = styled.View`
+  ${borderStyle}
 
-  cell: {
-    ...border,
+  width: 33.3333%;
+  height: 33.3333%;
+  flex-direction: row;
+  flex-wrap: wrap;
+`
 
-    width: '33.333%',
-    height: '33.333%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+const Cell = styled.TouchableHighlight`
+  ${borderStyle}
 
-  cellText: {
-    // fontWeight: 'bold',
-    fontSize: cellFontSize,
-  },
-})
+  width: 33.3333%;
+  height: 33.3333%;
+  justify-content: center;
+  align-items: center;
+`
+
+const CellText = styled.Text`
+  font-size: ${cellFontSize}px;
+`
