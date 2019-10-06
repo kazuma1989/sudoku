@@ -1,13 +1,19 @@
 {
   "compilerOptions": {
-    // https://parceljs.org/typeScript.html#when-using-react
-    "jsx": "react",
+    // https://github.com/necolas/react-native-web/blob/250ee3c234196fdddf6e5189c572a292566c3cb2/docs/guides/getting-started.md#configuring-babel
     "baseUrl": ".",
     "paths": {
       "react-native": ["node_modules/react-native-web"]
     },
 
+    // https://parceljs.org/typeScript.html#when-using-react
+    "jsx": "react",
+    // To use async/await
+    "lib": ["esnext"],
+    // `import React from 'react'` instead of `import * as React from 'react'`
     "esModuleInterop": true,
+
+    // Null checks is worth
     "strictNullChecks": true
   }
 }
