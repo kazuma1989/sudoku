@@ -8,8 +8,11 @@
 
     // https://parceljs.org/typeScript.html#when-using-react
     "jsx": "react",
-    // To use async/await
-    "lib": ["esnext"],
+    "lib": [
+      "dom",
+      // To use async/await
+      "esnext"
+    ],
     // `import React from 'react'` instead of `import * as React from 'react'`
     "esModuleInterop": true,
 
