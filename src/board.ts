@@ -1,4 +1,5 @@
 import produce from 'immer'
+import { nonNull } from './guard'
 
 export type Board = (
   | null
@@ -83,7 +84,3 @@ export const validate: (board: Board) => Board = produce(
     })
   },
 )
-
-function nonNull<T>(value: T | null | undefined): value is T {
-  return value !== null && value !== undefined
-}

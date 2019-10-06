@@ -1,12 +1,13 @@
 import React, { useReducer, useEffect } from 'react'
-import { Dimensions } from 'react-native'
+import { Dimensions, Alert, Platform } from 'react-native'
 import produce from 'immer'
 import styled, { css } from 'styled-components/native'
 import * as api from './api'
 import { Board, validate } from './board'
+import { nonNull } from './guard'
 
 export default function App() {
-  const [{ board, selected }, dispatch] = useReducer(reducer, {
+  const [{ board, selected, completed }, dispatch] = useReducer(reducer, {
     board: [
       [null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null],
@@ -19,6 +20,7 @@ export default function App() {
       [null, null, null, null, null, null, null, null, null],
     ],
     selected: [null, null],
+    completed: false,
   })
 
   useEffect(() => {
@@ -33,6 +35,16 @@ export default function App() {
         }),
       )
   }, [])
+
+  useEffect(() => {
+    if (!completed) return
+
+    if (Platform.OS === 'web') {
+      alert('\uD83C\uDF89 Congratulations!')
+    } else {
+      Alert.alert('\uD83C\uDF89 Congratulations!')
+    }
+  }, [completed])
 
   return (
     <Container>
@@ -179,6 +191,7 @@ const ButtonLabel = styled.Text`
 type State = {
   board: Board
   selected: [number, number] | [null, null]
+  completed: boolean
 }
 
 type Action =
@@ -213,6 +226,9 @@ const reducer: (state: State, action: Action) => State = produce(
       }
 
       case 'InputNumber': {
+        // Game over
+        if (draft.completed) return
+
         // Do nothing when no cell is selected
         if (draft.selected[0] === null) return
 
@@ -226,6 +242,21 @@ const reducer: (state: State, action: Action) => State = produce(
 
         cell.value = parseInt(action.payload) || null
         draft.board = validate(draft.board)
+
+        const filled =
+          draft.board
+            .flatMap(area => area.map(cell => cell && cell.value))
+            .filter(nonNull).length ===
+          9 * 9
+        if (filled) {
+          const someWrong = draft.board
+            .flatMap(area => area)
+            .some(cell => cell && cell.type === 'USER_INPUT' && cell.wrong)
+          if (!someWrong) {
+            draft.completed = true
+          }
+        }
+
         return
       }
 
