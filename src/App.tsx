@@ -1,16 +1,8 @@
 import React, { useReducer, useEffect } from 'react'
-import {
-  Text,
-  View,
-  ViewStyle,
-  Platform,
-  StatusBar,
-  Dimensions,
-  TouchableHighlight,
-} from 'react-native'
+import { Platform, StatusBar, Dimensions } from 'react-native'
 import produce from 'immer'
-import * as api from './api'
 import styled, { css } from 'styled-components/native'
+import * as api from './api'
 
 export default function App() {
   const [{ areas, selected }, dispatch] = useReducer(reducer, {
@@ -46,70 +38,128 @@ export default function App() {
       <Board>
         {areas.map((area, i) => (
           <Area key={i}>
-            {area.map((cell, j) => {
-              const key = `${i}-${j}`
-
-              return (
-                <Cell
-                  key={key}
-                  style={
-                    key === selected.join('-') && {
-                      backgroundColor: 'powderblue',
-                    }
-                  }
-                  onPress={() =>
-                    dispatch({
-                      type: 'TapCell',
-                      payload: [i, j],
-                    })
-                  }
-                  underlayColor="rgba(0,0,0,0.5)"
-                >
-                  <CellText>{cell}</CellText>
-                </Cell>
-              )
-            })}
+            {area.map((cell, j) => (
+              <Cell
+                key={`${i}-${j}`}
+                selected={`${i}${j}` === selected.join('')}
+                onPress={() =>
+                  dispatch({
+                    type: 'TapCell',
+                    payload: [i, j],
+                  })
+                }
+              >
+                <CellText>{cell}</CellText>
+              </Cell>
+            ))}
           </Area>
         ))}
       </Board>
 
-      <View
-        style={{
-          marginTop: 10,
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-        }}
-      >
+      <ButtonArea>
         {['1', '2', '3', '4', '5', '6', '7', '8', '9', '\u2573'].map(label => (
-          <TouchableHighlight
+          <NumberButton
             key={label}
-            style={{
-              ...border,
-              borderWidth: 1,
-              borderRadius: 50,
-              marginRight: 3,
-
-              width: 50,
-              height: 50,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
             onPress={() =>
               dispatch({
                 type: 'InputNumber',
                 payload: label,
               })
             }
-            underlayColor="rgba(0,0,0,0.5)"
           >
-            <Text style={{ fontSize: inputFontSize }}>{label}</Text>
-          </TouchableHighlight>
+            <ButtonLabel>{label}</ButtonLabel>
+          </NumberButton>
         ))}
-      </View>
+      </ButtonArea>
     </Container>
   )
 }
+
+const { width, height } = Dimensions.get('window')
+
+const [cellFontSize, inputFontSize] = [40, 50].map(size => {
+  const deviceHeight =
+    Platform.OS === 'android' ? height - StatusBar.currentHeight! : height
+
+  const standardScreenHeight = 680
+  return (size * deviceHeight) / standardScreenHeight
+})
+
+const Container = styled.View`
+  padding: 1px;
+`
+
+const borderStyle = css`
+  border-color: dimgray;
+  border-style: solid;
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 0;
+  border-left-width: 0;
+`
+
+const Board = styled.View`
+  ${borderStyle}
+  border-top-width: 0;
+  border-right-width: 0;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: ${width - 2}px;
+  height: ${width - 2}px;
+`
+
+const Area = styled.View`
+  ${borderStyle}
+
+  width: 33.3333%;
+  height: 33.3333%;
+  flex-direction: row;
+  flex-wrap: wrap;
+`
+
+const Cell = styled.TouchableHighlight.attrs({
+  underlayColor: 'rgba(0,0,0,0.5)',
+})<{ selected: boolean }>`
+  ${borderStyle}
+
+  ${p => p.selected && 'background-color: powderblue'};
+
+  width: 33.3333%;
+  height: 33.3333%;
+  justify-content: center;
+  align-items: center;
+`
+
+const CellText = styled.Text`
+  font-size: ${cellFontSize}px;
+`
+
+const ButtonArea = styled.View`
+  margin-top: 10px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+`
+
+const NumberButton = styled.TouchableHighlight.attrs({
+  underlayColor: 'rgba(0,0,0,0.5)',
+})`
+  margin-right: 3px;
+
+  border-width: 1px;
+  border-radius: 50px;
+  width: 50px;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+`
+
+const ButtonLabel = styled.Text`
+  font-size: ${inputFontSize}px;
+`
 
 type State = {
   areas: (number | null)[][]
@@ -262,70 +312,3 @@ const reducer: (state: State, action: Action) => State = produce(
     }
   },
 )
-
-const { width, height } = Dimensions.get('window')
-
-const [cellFontSize, inputFontSize] = [40, 50].map(size => {
-  const deviceHeight =
-    Platform.OS === 'android' ? height - StatusBar.currentHeight! : height
-
-  const standardScreenHeight = 680
-  return (size * deviceHeight) / standardScreenHeight
-})
-
-const border: ViewStyle = {
-  borderColor: 'dimgray',
-  borderStyle: 'solid',
-  borderTopWidth: 1,
-  borderRightWidth: 1,
-  borderBottomWidth: 0,
-  borderLeftWidth: 0,
-}
-
-const Container = styled.View`
-  padding: 1px;
-`
-
-const borderStyle = css`
-  border-color: dimgray;
-  border-style: solid;
-  border-top-width: 1px;
-  border-right-width: 1px;
-  border-bottom-width: 0;
-  border-left-width: 0;
-`
-
-const Board = styled.View`
-  ${borderStyle}
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: 2px;
-  border-left-width: 2px;
-
-  flex-direction: row;
-  flex-wrap: wrap;
-  width: ${width - 2}px;
-  height: ${width - 2}px;
-`
-
-const Area = styled.View`
-  ${borderStyle}
-
-  width: 33.3333%;
-  height: 33.3333%;
-  flex-direction: row;
-  flex-wrap: wrap;
-`
-
-const Cell = styled.TouchableHighlight`
-  ${borderStyle}
-
-  width: 33.3333%;
-  height: 33.3333%;
-  justify-content: center;
-  align-items: center;
-`
-
-const CellText = styled.Text`
-  font-size: ${cellFontSize}px;
-`
