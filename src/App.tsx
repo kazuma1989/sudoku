@@ -5,8 +5,8 @@ import styled, { css } from 'styled-components/native'
 import * as api from './api'
 
 export default function App() {
-  const [{ areas, selected }, dispatch] = useReducer(reducer, {
-    areas: [
+  const [{ board, selected }, dispatch] = useReducer(reducer, {
+    board: [
       [null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null],
@@ -36,7 +36,7 @@ export default function App() {
   return (
     <Container>
       <Board>
-        {areas.map((area, i) => (
+        {board.map((area, i) => (
           <Area key={i}>
             {area.map((cell, j) => (
               <Cell
@@ -162,7 +162,7 @@ const ButtonLabel = styled.Text`
 `
 
 type State = {
-  areas: (number | null)[][]
+  board: (number | null)[][]
   selected: [number, number] | [null, null]
 }
 
@@ -202,13 +202,13 @@ const reducer: (state: State, action: Action) => State = produce(
         if (draft.selected[0] === null) return
 
         const [i, j] = draft.selected
-        draft.areas[i][j] = parseInt(action.payload) || null
+        draft.board[i][j] = parseInt(action.payload) || null
 
         return
       }
 
       case 'SetupBoard': {
-        const { board: b } = action.payload
+        const { board } = action.payload
         ;[
           [0, 0, 0, 0],
           [0, 1, 0, 1],
@@ -300,7 +300,7 @@ const reducer: (state: State, action: Action) => State = produce(
           [8, 7, 8, 7],
           [8, 8, 8, 8],
         ].forEach(([i, j, apiI, apiJ]) => {
-          draft.areas[i][j] = b[apiI][apiJ] || null
+          draft.board[i][j] = board[apiI][apiJ] || null
         })
 
         return
