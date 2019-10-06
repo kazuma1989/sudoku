@@ -1,10 +1,11 @@
 import React, { useReducer, useEffect } from 'react'
-import { Dimensions, Alert, Platform } from 'react-native'
+import { Dimensions } from 'react-native'
 import produce from 'immer'
 import styled, { css } from 'styled-components/native'
 import * as api from './api'
 import { Board, validate } from './board'
 import { nonNull } from './guard'
+import alert from './alert'
 
 export default function App() {
   const [{ board, selected, completed }, dispatch] = useReducer(reducer, {
@@ -39,11 +40,7 @@ export default function App() {
   useEffect(() => {
     if (!completed) return
 
-    if (Platform.OS === 'web') {
-      alert('\uD83C\uDF89 Congratulations!')
-    } else {
-      Alert.alert('\uD83C\uDF89 Congratulations!')
-    }
+    alert('\uD83C\uDF89 Congratulations!')
   }, [completed])
 
   return (
