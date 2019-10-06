@@ -3,6 +3,7 @@ import { Dimensions } from 'react-native'
 import produce from 'immer'
 import styled, { css } from 'styled-components/native'
 import * as api from './api'
+import { Board, validate } from './board'
 
 export default function App() {
   const [{ board, selected }, dispatch] = useReducer(reducer, {
@@ -49,7 +50,10 @@ export default function App() {
                   })
                 }
               >
-                <CellText type={cell && cell.type}>
+                <CellText
+                  type={cell && cell.type}
+                  wrong={cell ? 'wrong' in cell && cell.wrong : false}
+                >
                   {cell && cell.value}
                 </CellText>
               </Cell>
@@ -131,9 +135,21 @@ const Cell = styled.TouchableHighlight.attrs({
   align-items: center;
 `
 
-const CellText = styled.Text<{ type: null | 'INITIAL_HINT' | 'USER_INPUT' }>`
+const CellText = styled.Text<{
+  type: null | 'INITIAL_HINT' | 'USER_INPUT'
+  wrong?: boolean
+}>`
   font-size: ${cellFontSize}px;
-  font-weight: ${p => (p.type === 'INITIAL_HINT' ? 'bold' : 'lighter')};
+  font-weight: ${p => {
+    if (p.type === 'INITIAL_HINT') {
+      return 'bold'
+    }
+    if (p.wrong) {
+      return 'normal'
+    }
+    return 'lighter'
+  }};
+  color: ${p => (p.wrong ? 'red' : 'initial')};
 `
 
 const ButtonArea = styled.View`
@@ -161,16 +177,7 @@ const ButtonLabel = styled.Text`
 `
 
 type State = {
-  board: (
-    | null
-    | {
-        type: 'INITIAL_HINT'
-        value: number
-      }
-    | {
-        type: 'USER_INPUT'
-        value: number | null
-      })[][]
+  board: Board
   selected: [number, number] | [null, null]
 }
 
@@ -214,14 +221,11 @@ const reducer: (state: State, action: Action) => State = produce(
 
         // Board is not ready
         if (!cell) return
+        // Cell is not writeable
+        if (cell.type !== 'USER_INPUT') return
 
-        // Cell is readonly
-        if (cell.type === 'INITIAL_HINT') return
-
-        draft.board[i][j] = {
-          type: 'USER_INPUT',
-          value: parseInt(action.payload) || null,
-        }
+        cell.value = parseInt(action.payload) || null
+        draft.board = validate(draft.board)
         return
       }
 
