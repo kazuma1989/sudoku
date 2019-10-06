@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect } from 'react'
-import { Platform, StatusBar, Dimensions } from 'react-native'
+import { Dimensions } from 'react-native'
 import produce from 'immer'
 import styled, { css } from 'styled-components/native'
 import * as api from './api'
@@ -49,7 +49,9 @@ export default function App() {
                   })
                 }
               >
-                <CellText>{cell}</CellText>
+                <CellText type={cell && cell.type}>
+                  {cell && cell.value}
+                </CellText>
               </Cell>
             ))}
           </Area>
@@ -75,14 +77,11 @@ export default function App() {
   )
 }
 
-const { width, height } = Dimensions.get('window')
+const { width: windowWidth } = Dimensions.get('window')
 
 const [cellFontSize, inputFontSize] = [40, 50].map(size => {
-  const deviceHeight =
-    Platform.OS === 'android' ? height - StatusBar.currentHeight! : height
-
-  const standardScreenHeight = 680
-  return (size * deviceHeight) / standardScreenHeight
+  const standardWindowWidth = 375
+  return size * (windowWidth / standardWindowWidth)
 })
 
 const Container = styled.View`
@@ -99,7 +98,7 @@ const borderStyle = css`
 `
 
 const Board = styled.View`
-  ${borderStyle}
+  ${borderStyle};
   border-top-width: 0;
   border-right-width: 0;
   border-bottom-width: 2px;
@@ -107,12 +106,12 @@ const Board = styled.View`
 
   flex-direction: row;
   flex-wrap: wrap;
-  width: ${width - 2}px;
-  height: ${width - 2}px;
+  width: ${windowWidth - 2}px;
+  height: ${windowWidth - 2}px;
 `
 
 const Area = styled.View`
-  ${borderStyle}
+  ${borderStyle};
 
   width: 33.3333%;
   height: 33.3333%;
@@ -122,19 +121,19 @@ const Area = styled.View`
 
 const Cell = styled.TouchableHighlight.attrs({
   underlayColor: 'rgba(0,0,0,0.5)',
-})<{ selected: boolean }>`
-  ${borderStyle}
+})<{ selected?: boolean }>`
+  ${borderStyle};
 
-  ${p => p.selected && 'background-color: powderblue'};
-
+  background-color: ${p => (p.selected ? 'powderblue' : 'initial')};
   width: 33.3333%;
   height: 33.3333%;
   justify-content: center;
   align-items: center;
 `
 
-const CellText = styled.Text`
+const CellText = styled.Text<{ type: null | 'INITIAL_HINT' | 'USER_INPUT' }>`
   font-size: ${cellFontSize}px;
+  font-weight: ${p => (p.type === 'INITIAL_HINT' ? 'bold' : 'lighter')};
 `
 
 const ButtonArea = styled.View`
@@ -144,10 +143,9 @@ const ButtonArea = styled.View`
   justify-content: center;
 `
 
-const NumberButton = styled.TouchableHighlight.attrs({
-  underlayColor: 'rgba(0,0,0,0.5)',
-})`
-  margin-right: 3px;
+const NumberButton = styled.TouchableOpacity`
+  margin-right: 7px;
+  margin-bottom: 7px;
 
   border-width: 1px;
   border-radius: 50px;
@@ -159,10 +157,20 @@ const NumberButton = styled.TouchableHighlight.attrs({
 
 const ButtonLabel = styled.Text`
   font-size: ${inputFontSize}px;
+  font-weight: lighter;
 `
 
 type State = {
-  board: (number | null)[][]
+  board: (
+    | null
+    | {
+        type: 'INITIAL_HINT'
+        value: number
+      }
+    | {
+        type: 'USER_INPUT'
+        value: number | null
+      })[][]
   selected: [number, number] | [null, null]
 }
 
@@ -202,8 +210,18 @@ const reducer: (state: State, action: Action) => State = produce(
         if (draft.selected[0] === null) return
 
         const [i, j] = draft.selected
-        draft.board[i][j] = parseInt(action.payload) || null
+        const cell = draft.board[i][j]
 
+        // Board is not ready
+        if (!cell) return
+
+        // Cell is readonly
+        if (cell.type === 'INITIAL_HINT') return
+
+        draft.board[i][j] = {
+          type: 'USER_INPUT',
+          value: parseInt(action.payload) || null,
+        }
         return
       }
 
@@ -300,7 +318,16 @@ const reducer: (state: State, action: Action) => State = produce(
           [8, 7, 8, 7],
           [8, 8, 8, 8],
         ].forEach(([i, j, apiI, apiJ]) => {
-          draft.board[i][j] = board[apiI][apiJ] || null
+          const value = board[apiI][apiJ]
+          draft.board[i][j] = value
+            ? {
+                type: 'INITIAL_HINT',
+                value,
+              }
+            : {
+                type: 'USER_INPUT',
+                value: null,
+              }
         })
 
         return
