@@ -1,5 +1,4 @@
 import React, { useReducer, useEffect } from 'react'
-import { Dimensions } from 'react-native'
 import produce from 'immer'
 import styled from 'styled-components/native'
 import * as api from './api'
@@ -7,6 +6,7 @@ import { Board, validate } from './board'
 import { nonNull } from './guard'
 import alert from './alert'
 import BoardArea from './BoardArea'
+import ButtonArea from './ButtonArea'
 
 export default function App() {
   const [{ board, selected, completed }, dispatch] = useReducer(reducer, {
@@ -57,58 +57,20 @@ export default function App() {
         }
       />
 
-      <ButtonArea>
-        {['1', '2', '3', '4', '5', '6', '7', '8', '9', '\u2573'].map(label => (
-          <NumberButton
-            key={label}
-            onPress={() =>
-              dispatch({
-                type: 'InputNumber',
-                payload: label,
-              })
-            }
-          >
-            <ButtonLabel>{label}</ButtonLabel>
-          </NumberButton>
-        ))}
-      </ButtonArea>
+      <ButtonArea
+        onTapButton={label =>
+          dispatch({
+            type: 'InputNumber',
+            payload: label,
+          })
+        }
+      />
     </Container>
   )
 }
 
-const { width: windowWidth } = Dimensions.get('window')
-
-const [cellFontSize, inputFontSize] = [40, 50].map(size => {
-  const standardWindowWidth = 375
-  return size * (windowWidth / standardWindowWidth)
-})
-
 const Container = styled.View`
   padding: 1px;
-`
-
-const ButtonArea = styled.View`
-  margin-top: 10px;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-`
-
-const NumberButton = styled.TouchableOpacity`
-  margin-right: 7px;
-  margin-bottom: 7px;
-
-  border-width: 1px;
-  border-radius: 50px;
-  width: 50px;
-  height: 50px;
-  justify-content: center;
-  align-items: center;
-`
-
-const ButtonLabel = styled.Text`
-  font-size: ${inputFontSize}px;
-  font-weight: lighter;
 `
 
 type State = {
