@@ -1,5 +1,5 @@
 import produce from 'immer'
-import { nonNull } from './guard'
+import { nonNull } from './util/guard'
 
 export type Board = (
   | null
