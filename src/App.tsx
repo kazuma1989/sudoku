@@ -1,11 +1,12 @@
 import React, { useReducer, useEffect } from 'react'
 import { Dimensions } from 'react-native'
 import produce from 'immer'
-import styled, { css } from 'styled-components/native'
+import styled from 'styled-components/native'
 import * as api from './api'
 import { Board, validate } from './board'
 import { nonNull } from './guard'
 import alert from './alert'
+import BoardArea from './BoardArea'
 
 export default function App() {
   const [{ board, selected, completed }, dispatch] = useReducer(reducer, {
@@ -45,31 +46,16 @@ export default function App() {
 
   return (
     <Container>
-      <Board>
-        {board.map((area, i) => (
-          <Area key={i}>
-            {area.map((cell, j) => (
-              <Cell
-                key={`${i}-${j}`}
-                selected={`${i}${j}` === selected.join('')}
-                onPress={() =>
-                  dispatch({
-                    type: 'TapCell',
-                    payload: [i, j],
-                  })
-                }
-              >
-                <CellText
-                  type={cell && cell.type}
-                  wrong={cell ? 'wrong' in cell && cell.wrong : false}
-                >
-                  {cell && cell.value}
-                </CellText>
-              </Cell>
-            ))}
-          </Area>
-        ))}
-      </Board>
+      <BoardArea
+        board={board}
+        selected={selected}
+        onTapCell={(i, j) =>
+          dispatch({
+            type: 'TapCell',
+            payload: [i, j],
+          })
+        }
+      />
 
       <ButtonArea>
         {['1', '2', '3', '4', '5', '6', '7', '8', '9', '\u2573'].map(label => (
@@ -99,66 +85,6 @@ const [cellFontSize, inputFontSize] = [40, 50].map(size => {
 
 const Container = styled.View`
   padding: 1px;
-`
-
-const borderStyle = css`
-  border-color: dimgray;
-  border-style: solid;
-  border-top-width: 1px;
-  border-right-width: 1px;
-  border-bottom-width: 0;
-  border-left-width: 0;
-`
-
-const Board = styled.View`
-  ${borderStyle};
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: 2px;
-  border-left-width: 2px;
-
-  flex-direction: row;
-  flex-wrap: wrap;
-  width: ${windowWidth - 2}px;
-  height: ${windowWidth - 2}px;
-`
-
-const Area = styled.View`
-  ${borderStyle};
-
-  width: 33.3333%;
-  height: 33.3333%;
-  flex-direction: row;
-  flex-wrap: wrap;
-`
-
-const Cell = styled.TouchableHighlight.attrs({
-  underlayColor: 'rgba(0,0,0,0.5)',
-})<{ selected?: boolean }>`
-  ${borderStyle};
-
-  background-color: ${p => (p.selected ? 'powderblue' : 'initial')};
-  width: 33.3333%;
-  height: 33.3333%;
-  justify-content: center;
-  align-items: center;
-`
-
-const CellText = styled.Text<{
-  type: null | 'INITIAL_HINT' | 'USER_INPUT'
-  wrong?: boolean
-}>`
-  font-size: ${cellFontSize}px;
-  font-weight: ${p => {
-    if (p.type === 'INITIAL_HINT') {
-      return 'bold'
-    }
-    if (p.wrong) {
-      return 'normal'
-    }
-    return 'lighter'
-  }};
-  color: ${p => (p.wrong ? 'red' : 'initial')};
 `
 
 const ButtonArea = styled.View`
