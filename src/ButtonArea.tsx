@@ -1,6 +1,6 @@
 import React from 'react'
-import { Dimensions } from 'react-native'
 import styled from 'styled-components/native'
+import fontSize from './util/fontSize'
 
 type Props = {
   onTapButton: (label: string) => unknown
@@ -18,12 +18,7 @@ export default function ButtonArea({ onTapButton }: Props) {
   )
 }
 
-const { width: windowWidth } = Dimensions.get('window')
-
-const [cellFontSize, inputFontSize] = [40, 50].map(size => {
-  const standardWindowWidth = 375
-  return size * (windowWidth / standardWindowWidth)
-})
+const inputFontSize = fontSize(50)
 
 const _ButtonArea = styled.View`
   margin-top: 10px;

@@ -2,6 +2,7 @@ import React from 'react'
 import { Dimensions } from 'react-native'
 import styled, { css } from 'styled-components/native'
 import { Board } from './board'
+import fontSize from './util/fontSize'
 
 type Props = {
   board: Board
@@ -35,11 +36,7 @@ export default function BoardArea({ board, selected, onTapCell }: Props) {
 }
 
 const { width: windowWidth } = Dimensions.get('window')
-
-const [cellFontSize, inputFontSize] = [40, 50].map(size => {
-  const standardWindowWidth = 375
-  return size * (windowWidth / standardWindowWidth)
-})
+const cellFontSize = fontSize(40)
 
 const borderStyle = css`
   border-color: dimgray;
